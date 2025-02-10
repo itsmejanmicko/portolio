@@ -1,14 +1,33 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
-import expressvg from '../../utils/svg/Express.svg';
-import firebasevg from '../../utils/svg/firebase-svgrepo-com.svg';
-import mongodbvg from '../../utils/svg/mongodb-svgrepo-com.svg';
-import nodejsvg from '../../utils/svg/node-js-svgrepo-com.svg';
-import reactvg from '../../utils/svg/reactjs-svgrepo-com.svg';
-import typescript from '../../utils/svg/typescript-svgrepo-com.svg';
-import database from '../../utils/svg/browser-website-svgrepo-com.svg';
-import frontent from '../../utils/svg/icons8-frontend-50.png';
-import backend from '../../utils/svg/icons8-database-50.png';
+import { useState, useEffect } from "react";
+import expressvg from "../../utils/svg/Express.svg";
+import firebasevg from "../../utils/svg/firebase-svgrepo-com.svg";
+import mongodbvg from "../../utils/svg/mongodb-svgrepo-com.svg";
+import nodejsvg from "../../utils/svg/node-js-svgrepo-com.svg";
+import reactvg from "../../utils/svg/reactjs-svgrepo-com.svg";
+import typescript from "../../utils/svg/typescript-svgrepo-com.svg";
+import database from "../../utils/svg/browser-website-svgrepo-com.svg";
+import frontent from "../../utils/svg/icons8-frontend-50.png";
+import backend from "../../utils/svg/icons8-database-50.png";
+
+// Responsive Hook to Detect Screen Size
+const useMediaQuery = (query: string): boolean => {
+  const [matches, setMatches] = useState<boolean>(false);
+  
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    
+    const listener = () => setMatches(media.matches);
+    media.addEventListener("change", listener);
+    
+    return () => media.removeEventListener("change", listener);
+  }, [matches, query]);
+
+  return matches;
+};
 
 const skills = [
   {
@@ -43,22 +62,35 @@ const technologies = [
 const loopingTechnologies = [...technologies, ...technologies];
 
 export default function Skills() {
+  const isMobile = useMediaQuery("(max-width: 640px)"); // Detect Mobile Screens
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <main className="min-h-screen bg-[#0a192f] text-white font-custom relative flex flex-col justify-center items-center py-20">
-      {/* Centered Blurred Gradient */}
-      <motion.div
-        initial={{ rotate: "0deg", scale: 1, opacity: 0.6, y: 0 }}
-        animate={{ rotate: "360deg", scale: [1, 1.2, 1.6], opacity: [0.6, 0.8, 0.6], y: [0, -10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-      >
-        <div className="w-[350px] h-[350px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-[160px] opacity-50 rounded-full"></div>
-      </motion.div>
+      {/* Centered Blurred Gradient - Only on Desktop */}
+      {!isMobile && (
+        <motion.div
+          initial={{ rotate: "0deg", scale: 1, opacity: 0.6, y: 0 }}
+          animate={{
+            rotate: "360deg",
+            scale: [1, 1.2, 1.6],
+            opacity: [0.6, 0.8, 0.6],
+            y: [0, -10, 0],
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
+          <div className="w-[350px] h-[350px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-[160px] opacity-50 rounded-full"></div>
+        </motion.div>
+      )}
 
       {/* Title */}
-      <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.5 }} className="relative z-10 sm:px-32 px-6 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.5 }}
+        className="relative z-10 sm:px-32 px-6 py-10"
+      >
         <h1 className="text-xl font-bold underline decoration-white decoration-2 underline-offset-4">
           What <span className="text-purple-400">I can do →</span>
         </h1>
@@ -74,7 +106,9 @@ export default function Skills() {
             transition={{ duration: 0.5, delay: index * 0.3 }}
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
-            className={`relative transition-all duration-300 ${hoveredIndex !== null && hoveredIndex !== index ? "blur-sm opacity-50" : "opacity-100"}`}
+            className={`relative transition-all duration-300 ${
+              hoveredIndex !== null && hoveredIndex !== index ? "blur-sm opacity-50" : "opacity-100"
+            }`}
           >
             <div className="bg-purple-900 rounded-lg shadow-2xl p-4">
               <div className="flex items-center gap-4">
@@ -87,22 +121,44 @@ export default function Skills() {
         ))}
       </div>
 
-      {/* Technologies Carousel */}
-      <div className="mt-10 text-xl font-bold"><p className=""><label className="text-purple-400">Technologies</label> I Use</p> </div>
-      <div className="w-1/2 overflow-hidden mt-4 relative">
-        <motion.div
-          className="flex gap-5 w-max"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, repeatType: "loop", duration: 10, ease: "linear" }}
-        >
-          {loopingTechnologies.map((tech, index) => (
-            <div key={index} className="flex flex-col items-center justify-center px-4 py-4 min-w-[120px]">
+      {/* Technologies Section */}
+      <div className="mt-10 text-xl font-bold">
+        <p>
+          <label className="text-purple-400">Technologies</label> I Use
+        </p>
+      </div>
+
+      {/* Conditionally Render Carousel or Grid */}
+      {isMobile ? (
+        <div className="grid grid-cols-2 gap-4 px-10 mt-6">
+          {technologies.map((tech, index) => (
+            <div key={index} className="flex flex-col items-center justify-center px-4 py-4 bg-purple-900 rounded-lg">
               <img src={tech.img} alt={tech.title} className="w-10 h-10 rounded-xl" />
               <h1 className="text-sm mt-2">{tech.title}</h1>
             </div>
           ))}
-        </motion.div>
-      </div>
+        </div>
+      ) : (
+        <div className="w-1/2 overflow-hidden mt-4 relative">
+          <motion.div
+            className="flex gap-5 w-max"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              repeat: Infinity,
+              repeatType: "loop",
+              duration: 10,
+              ease: "linear",
+            }}
+          >
+            {loopingTechnologies.map((tech, index) => (
+              <div key={index} className="flex flex-col items-center justify-center px-4 py-4 min-w-[120px]">
+                <img src={tech.img} alt={tech.title} className="w-10 h-10 rounded-xl" />
+                <h1 className="text-sm mt-2">{tech.title}</h1>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      )}
     </main>
   );
 }
